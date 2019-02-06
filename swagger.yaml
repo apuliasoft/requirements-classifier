@@ -1,0 +1,560 @@
+swagger: '2.0'
+info:
+  description: REST API for requirement classifier using mahout
+  title: Requirement Classifier API
+  version: '1.0'
+  license:
+    name: '0.1'
+host: '217.172.12.199:9402'
+basePath: /
+tags:
+  - name: classification-controller
+    description: Classification Controller
+  - name: domain-classification-controller
+    description: Domain Classification Controller
+paths:
+  /upc/classifier-component/classify:
+    post:
+      tags:
+        - classification-controller
+      summary: Classify a list of requirements
+      description: 'Given a list of requirements, and using the model stored for the requested company, the requirements are classified  and a recommended label is returned for each requirement (with a level of confidence)'
+      operationId: classifyUsingPOST
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: company
+          in: query
+          description: Company to which the model belong
+          required: true
+          type: string
+          allowEmptyValue: false
+        - name: property
+          in: query
+          description: Property of the classifier
+          required: true
+          type: string
+          allowEmptyValue: false
+        - in: body
+          name: request
+          description: Request with the requirements to classify
+          required: true
+          schema:
+            $ref: '#/definitions/Requirements_list'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/RecommendationList'
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      deprecated: false
+  /upc/classifier-component/deleteModel:
+    post:
+      tags:
+        - classification-controller
+      summary: Deleted an existing model
+      description: 'Given a company and a property, deletes the associated stored model.'
+      operationId: deleteModelUsingPOST
+      consumes:
+        - application/json
+      produces:
+        - '*/*'
+      parameters:
+        - in: body
+          name: request
+          description: request
+          required: true
+          schema:
+            $ref: '#/definitions/CompanyPropertyKey'
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: string
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      deprecated: false
+  /upc/classifier-component/domain/classify:
+    post:
+      tags:
+        - domain-classification-controller
+      summary: Classify by domain
+      description: 'Given a list of requirements, a company name and a domain of the company, classifies the list of requirements using the domain model. The result is a list of recommendations based on the classification results.'
+      operationId: classifyUsingPOST_1
+      consumes:
+        - application/json
+      produces:
+        - '*/*'
+      parameters:
+        - name: company
+          in: query
+          description: Company to which the model belong
+          required: true
+          type: string
+          allowEmptyValue: false
+        - name: domain
+          in: query
+          description: Domain to classify requirements by
+          required: true
+          type: string
+          allowEmptyValue: false
+        - in: body
+          name: request
+          description: Request with the requirements to train
+          required: true
+          schema:
+            $ref: '#/definitions/Requirements_list'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/RecommendationList'
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      deprecated: false
+  /upc/classifier-component/domain/train:
+    post:
+      tags:
+        - domain-classification-controller
+      summary: Create domain models
+      description: 'Given a list of requirements and a company name, a model is created for each domain present in the requirements list. Each model evaluates if the requirement belongs to the domain or not.'
+      operationId: testUsingPOST
+      consumes:
+        - application/json
+      produces:
+        - '*/*'
+      parameters:
+        - name: company
+          in: query
+          description: Company to which the model belong
+          required: true
+          type: string
+          allowEmptyValue: false
+        - in: body
+          name: request
+          description: Request with the requirements to train
+          required: true
+          schema:
+            $ref: '#/definitions/Requirements_list'
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: string
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      deprecated: false
+  /upc/classifier-component/domain/train&test:
+    post:
+      tags:
+        - domain-classification-controller
+      summary: Train and test by domain
+      description: |
+        Returns the result of k cross-validation using the requirements recieved in the request and the model of the implicit company and domain. Splits the requirements in k groups, trains a classifier for each group with all of the requirements recieved except the ones in the group and tests it with the requirements in the group.
+        Returns the average of several statistics like the accuracy of the model
+      operationId: trainAndTestUsingPOST_1
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: k
+          in: query
+          description: Number of tests
+          required: true
+          type: integer
+          format: int32
+          allowEmptyValue: false
+        - in: body
+          name: request
+          description: Request with the requirements to test
+          required: true
+          schema:
+            $ref: '#/definitions/Requirements_list'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/DomainStats'
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      deprecated: false
+  /upc/classifier-component/parse:
+    post:
+      tags:
+        - classification-controller
+      summary: parseSiemensToOpenReq
+      operationId: parseSiemensToOpenReqUsingPOST
+      consumes:
+        - application/json
+      produces:
+        - '*/*'
+      parameters:
+        - in: body
+          name: siemensRequirementList
+          description: siemensRequirementList
+          required: true
+          schema:
+            $ref: '#/definitions/SiemensRequirementList'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Requirements_list'
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      deprecated: false
+  /upc/classifier-component/train:
+    post:
+      tags:
+        - classification-controller
+      summary: Train a model
+      description: 'Given a list of requirements, and a specific company and property, a new model is generated and stored in the database'
+      operationId: trainUsingPOST
+      consumes:
+        - application/json
+      produces:
+        - '*/*'
+      parameters:
+        - name: company
+          in: query
+          description: Company to which the model belong
+          required: true
+          type: string
+          allowEmptyValue: false
+        - name: property
+          in: query
+          description: Property of the classifier
+          required: true
+          type: string
+          allowEmptyValue: false
+        - in: body
+          name: request
+          description: Request with the requirements to train
+          required: true
+          schema:
+            $ref: '#/definitions/Requirements_list'
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: string
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      deprecated: false
+  /upc/classifier-component/train&test:
+    post:
+      tags:
+        - classification-controller
+      summary: Train and test
+      description: |
+        Returns the result of k cross-validation using the requirements recieved in the request. Splits the requirements in k groups, trains a classifier for each group with all of the requirements recieved except the ones in the group and tests it with the requirements in the group.
+        Returns the average of several statistics like the accuracy of the model
+      operationId: trainAndTestUsingPOST
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: k
+          in: query
+          description: Number of tests
+          required: true
+          type: integer
+          format: int32
+          allowEmptyValue: false
+        - in: body
+          name: request
+          description: Request with the requirements to test
+          required: true
+          schema:
+            $ref: '#/definitions/Requirements_list'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Stats'
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      deprecated: false
+  /upc/classifier-component/update:
+    post:
+      tags:
+        - classification-controller
+      summary: Update a model
+      description: 'Given a list of requirements, updates the model of the classifier for the given company'
+      operationId: updateUsingPOST
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: company
+          in: query
+          description: Company to which the model belong
+          required: true
+          type: string
+          allowEmptyValue: false
+        - name: property
+          in: query
+          description: Property of the classifier
+          required: true
+          type: string
+          allowEmptyValue: false
+        - in: body
+          name: request
+          description: Request with the requirements to train and update the model
+          required: true
+          schema:
+            $ref: '#/definitions/Requirements_list'
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: string
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      deprecated: false
+definitions:
+  CompanyPropertyKey:
+    type: object
+    properties:
+      company:
+        type: string
+      property:
+        type: string
+    title: CompanyPropertyKey
+  ConfusionMatrixStats:
+    type: object
+    properties:
+      false_negatives:
+        type: integer
+        format: int32
+        description: False negatives
+      false_positives:
+        type: integer
+        format: int32
+        description: False positives
+      true_negatives:
+        type: integer
+        format: int32
+        description: True negatives
+      true_positives:
+        type: integer
+        format: int32
+        description: True positives
+    title: ConfusionMatrixStats
+  DomainStats:
+    type: object
+    properties:
+      accuracy:
+        type: number
+        format: double
+        description: Accuracy
+      confusion_matrix:
+        type: object
+        description: Confusion matrix
+        additionalProperties:
+          $ref: '#/definitions/ConfusionMatrixStats'
+      kappa:
+        type: number
+        format: double
+        description: Kappa
+      reliability:
+        type: number
+        format: double
+        description: Reliability
+      reliability_std_deviation:
+        type: number
+        format: double
+        description: Reliability standard deviation
+      weighted_f1_score:
+        type: number
+        format: double
+        description: Weighted F1 score
+      weighted_precision:
+        type: number
+        format: double
+        description: Weighted precision
+      weighted_recall:
+        type: number
+        format: double
+        description: Weighted recall
+    title: DomainStats
+  Recommendation:
+    type: object
+    properties:
+      confidence:
+        type: number
+        format: double
+      requirement:
+        type: string
+      requirement_type:
+        type: string
+    title: Recommendation
+  RecommendationList:
+    type: object
+    properties:
+      recommendations:
+        type: array
+        items:
+          $ref: '#/definitions/Recommendation'
+    title: RecommendationList
+  Requirement:
+    type: object
+    properties:
+      id:
+        type: string
+        description: ID of the requirement
+      reqDomains:
+        type: string
+        description: Requirement domains
+      requirement_type:
+        type: string
+        description: Requirement type
+      text:
+        type: string
+        description: Text with the requirement information
+    title: Requirement
+    description: A project requirement
+  Requirements_list:
+    type: object
+    properties:
+      requirements:
+        type: array
+        description: Requirements list
+        items:
+          $ref: '#/definitions/Requirement'
+    title: Requirements list
+    description: A project reqs list
+  SiemensRequirement:
+    type: object
+    properties:
+      heading:
+        type: string
+      level:
+        type: integer
+        format: int32
+      reqDomains:
+        type: string
+      reqType:
+        type: string
+      text:
+        type: string
+      toolId:
+        type: string
+    title: SiemensRequirement
+  SiemensRequirementList:
+    type: object
+    properties:
+      reqs:
+        type: array
+        items:
+          $ref: '#/definitions/SiemensRequirement'
+    title: SiemensRequirementList
+  Stats:
+    type: object
+    properties:
+      accuracy:
+        type: number
+        format: double
+        description: Accuracy
+      false_negatives:
+        type: integer
+        format: int32
+        description: False negatives
+      false_positives:
+        type: integer
+        format: int32
+        description: False positives
+      kappa:
+        type: number
+        format: double
+        description: Kappa
+      reliability:
+        type: number
+        format: double
+        description: Reliability
+      reliability_std_deviation:
+        type: number
+        format: double
+        description: Reliability standard deviation
+      true_negatives:
+        type: integer
+        format: int32
+        description: True negatives
+      true_positives:
+        type: integer
+        format: int32
+        description: True positives
+      weighted_f1_score:
+        type: number
+        format: double
+        description: Weighted F1 score
+      weighted_precision:
+        type: number
+        format: double
+        description: Weighted precision
+      weighted_recall:
+        type: number
+        format: double
+        description: Weighted recall
+    title: Stats
+    description: Stats results of the classifier test
