@@ -1,0 +1,38 @@
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+src/test/
+debug/
+StubFiles/
+scripts/dumb.sh
+src/main/resources/templates/
+src/main/java/com/example/mahout/javaFX/
+src/test/
+hadoop/etc/hadoop/hdfs-site.xml
+hadoop/etc/hadoop/hadoop-env.sh
+config/environment.txt
+src/main/java/com/example/mahout/testSets\.java
+src/main/java/com/example/mahout/getNumbers\.java
+src/main/java/com/example/mahout/ReadLAbelindx\.java
+mahout/mahout-examples-0\.12\.2-job\.jar
