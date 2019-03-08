@@ -71,7 +71,20 @@ The project includes an isolated, integrated version of Hadoop and Mahout. In or
 
   All mahout and hadoop variables should start with the path of the project.
 
-  (UNIX) modify .bashrc to include this variables.
+  (UNIX) modify .bashrc to include these variables:
+  
+      export JAVA_HOME=java-path
+      export HADOOP_HOME=project-path/hadoop
+      export PATH=$PATH:$HADOOP_HOME/bin
+      export PATH=$PATH:$HADOOP_HOME/sbin
+      export HADOOP_MAPRED_HOME=$HADOOP_HOME
+      export HADOOP_COMMON_HOME=$HADOOP_HOME
+      export HADOOP_HDFS_HOME=$HADOOP_HOME
+      export MAHOUT_HOME=project-path/mahout
+      export PATH=$PATH:$MAHOUT_HOME/bin
+      export YARN_HOME=$HADOOP_HOME
+      export HADOOP_COMMON_LIB_NATIVE_DIR=$HADOOP_HOME/lib/native
+      export HADOOP_OPTS="-Djava.library.path=$HADOOP_HOME/lib"
 
   Modify file hadoop/etc/hadoop/hadoop-env.sh and set variable JAVA_HOME.
 
@@ -118,6 +131,13 @@ hdfs dfsadmin -safemode leave
 ```
 
 3. **Build project**
+
+Before building the project, it is necessary to download an external dependency: http://central.maven.org/maven2/org/apache/mahout/mahout-examples/0.12.2/mahout-examples-0.12.2-job.jar 
+
+This file must be placed in the mahout/ folder
+
+Once this has been done, build the project by running:
+
 ```
 mvn clean install package
 ```
