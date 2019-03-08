@@ -38,7 +38,10 @@ public class DataService {
         List<Requirement> filteredRequirements = new ArrayList<>();
         for (int i = 0; i < requirements.size(); ++i) {
             Requirement requirement = requirements.get(i);
-            if (!requirement.getRequirement_type().equals("Heading"))
+            if (requirement.getRequirement_type() != null &&
+                    !requirement.getRequirement_type().equals("Heading"))
+                filteredRequirements.add(requirement);
+            else if (requirement.getRequirement_type() == null)
                 filteredRequirements.add(requirement);
         }
         System.out.println("Input: " + requirements.size() + " requirements, " + filteredRequirements.size() + " after filtering (header sections)");

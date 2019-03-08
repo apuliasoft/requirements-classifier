@@ -554,7 +554,7 @@ public class ClassificationService {
         HashMap<String, RequirementList> domainRequirementsMap = dataService.mapByDomain(request);
         for (String domain : domainRequirementsMap.keySet()) {
             if (!domain.trim().isEmpty()) {
-                if (domain.equals("Bid_Manager")) createDomainModel(request, domainRequirementsMap.get(domain), enterprise, domain);
+                createDomainModel(request, domainRequirementsMap.get(domain), enterprise, domain);
             }
         }
         System.out.println("Done");
