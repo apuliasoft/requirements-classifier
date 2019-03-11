@@ -72,7 +72,7 @@ The project includes an isolated, integrated version of Hadoop and Mahout. In or
   All mahout and hadoop variables should start with the path of the project.
 
   (UNIX) modify .bashrc to include these variables:
-  
+
       export JAVA_HOME=java-path
       export HADOOP_HOME=project-path/hadoop
       export PATH=$PATH:$HADOOP_HOME/bin
@@ -132,7 +132,7 @@ hdfs dfsadmin -safemode leave
 
 3. **Build project**
 
-Before building the project, it is necessary to download an external dependency: http://central.maven.org/maven2/org/apache/mahout/mahout-examples/0.12.2/mahout-examples-0.12.2-job.jar 
+Before building the project, it is necessary to download an external dependency: http://central.maven.org/maven2/org/apache/mahout/mahout-examples/0.12.2/mahout-examples-0.12.2-job.jar
 
 This file must be placed in the mahout/ folder
 
@@ -146,7 +146,7 @@ Make sure Hadoop is up and running. Otherwise, tests will fail.
 
 ### How to use it
 
-You can take a look at the Swagger documentation [here](http://217.172.12.199:9402/swagger-ui.html#/), which includes specific, technical details of the REST API to communicate to the service.
+You can take a look at the Swagger documentation [here](https://api.openreq.eu/requirements-classifier/swagger-ui.html), which includes specific, technical details of the REST API to communicate to the service.
 
 ### Notes for developers
 
