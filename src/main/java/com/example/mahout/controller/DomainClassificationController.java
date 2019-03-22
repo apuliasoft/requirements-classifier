@@ -13,23 +13,24 @@ import java.util.HashMap;
 import java.util.List;
 
 @RestController
-@RequestMapping("/upc/classifier-component/domain")
+@RequestMapping("/upc/classifier-component/multiclassifier")
 @Api(value = "Facade", produces = MediaType.APPLICATION_JSON_VALUE)
 public class DomainClassificationController {
 
     @Autowired
     private ClassificationService classificationService;
-    @Autowired
-    private DataService dataService;
 
     @PostMapping("/train")
-    @ApiOperation(value = "Create domain models",
-            notes = "Given a list of requirements and a company name, a model is created for each domain present in the requirements list." +
+    @ApiOperation(value = "Create multiple property models",
+            notes = "Given a list of requirements and a company name, a model is created for each property value of the property PROP" +
+                    " present in the requirements list." +
                     " Each model evaluates if the requirement belongs to the domain or not.")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "OK", response = String.class)})
     public void test(@ApiParam(value = "Request with the requirements to train", required = true) @RequestBody RequirementList request,
-                     @ApiParam(value = "Company to which the model belong", required = true) @RequestParam("company") String enterpriseName) throws Exception {
-        classificationService.trainByDomain(request, enterpriseName);
+                     @ApiParam(value = "Company to which the model belong", required = true) @RequestParam("company") String enterpriseName,
+                     @ApiParam(value = "Property to build the multiclassifier")
+                         @RequestParam(value = "property-key", required = false, defaultValue = "reqDomains") String propertyKey) throws Exception {
+        classificationService.trainByDomain(request, enterpriseName, propertyKey);
     }
 
     @PostMapping("/classify")
@@ -52,9 +53,11 @@ public class DomainClassificationController {
                     "Returns the average of several statistics like the accuracy of the model\n")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "OK", response = DomainStats.class)})
     public DomainStats trainAndTest(@ApiParam(value = "Request with the requirements to test", required = true) @RequestBody RequirementList request,
-                                    @ApiParam(value = "Number of tests", required = true) @RequestParam("k") int n) throws Exception {
+                                    @ApiParam(value = "Number of tests", required = true) @RequestParam("k") int n,
+                                    @ApiParam(value = "Property to build the multiclassifier")
+                                        @RequestParam(value = "property-key", required = false, defaultValue = "reqDomains") String propertyKey) throws Exception {
         System.out.println("Starting train and test functionality");
-        DomainStats result = classificationService.trainAndTestByDomain(request, n);
+        DomainStats result = classificationService.trainAndTestByDomain(request, n, propertyKey);
         return result;
 
     }

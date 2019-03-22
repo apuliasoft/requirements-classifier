@@ -106,7 +106,7 @@ public class DataService {
                 requirement.setText(siemensRequirement.getText());
                 requirement.setRequirement_type(siemensRequirement.getReqType());
             }
-            requirement.setReqDomains(siemensRequirement.getReqDomains());
+            requirement.setReqDomains("reqDomains", siemensRequirement.getReqDomains());
             requirements.add(requirement);
         }
         requirementList.setRequirements(requirements);
@@ -239,10 +239,10 @@ public class DataService {
         return results;
     }
 
-    public HashMap<String,RequirementList> mapByDomain(RequirementList request) {
+    public HashMap<String,RequirementList> mapByDomain(RequirementList request, String property) throws Exception {
         HashMap<String, RequirementList> domainRequirementsMap = new HashMap<>();
         for (Requirement r : request.getRequirements()) {
-            String domains[] = r.getReqDomains().split("\n");
+            String domains[] = r.getReqDomains(property).split("\n");
             for (String domain : domains) {
                 if (!domain.trim().isEmpty()) {
                     if (domainRequirementsMap.containsKey(domain)) {

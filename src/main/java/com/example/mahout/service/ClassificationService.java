@@ -550,8 +550,8 @@ public class ClassificationService {
         return "Files deleted correctly";
     }
 
-    public void trainByDomain(RequirementList request, String enterprise) throws Exception {
-        HashMap<String, RequirementList> domainRequirementsMap = dataService.mapByDomain(request);
+    public void trainByDomain(RequirementList request, String enterprise, String propertyKey) throws Exception {
+        HashMap<String, RequirementList> domainRequirementsMap = dataService.mapByDomain(request, propertyKey);
         for (String domain : domainRequirementsMap.keySet()) {
             if (!domain.trim().isEmpty()) {
                 createDomainModel(request, domainRequirementsMap.get(domain), enterprise, domain);
@@ -565,7 +565,8 @@ public class ClassificationService {
             if (requirementDomainList.getRequirements().contains(requirement)) {
                 requirement.setRequirement_type(domain);
             }
-            else if (!requirement.getRequirement_type().equals("Heading")) requirement.setRequirement_type("Prose");
+            else if (requirement.getRequirement_type() == null ||
+                    (requirement.getRequirement_type() != null && requirement.getRequirement_type().equals("Heading"))) requirement.setRequirement_type("Prose");
         }
         System.out.println("Creating " + domain + " model...");
         train(request, domain, enterprise);
@@ -576,8 +577,8 @@ public class ClassificationService {
        return classify(request, property, enterpriseName);
     }
 
-    public DomainStats trainAndTestByDomain(RequirementList request, int n) throws Exception {
-        HashMap<String, RequirementList> domainRequirementsMap = dataService.mapByDomain(request);
+    public DomainStats trainAndTestByDomain(RequirementList request, int n, String propertyKey) throws Exception {
+        HashMap<String, RequirementList> domainRequirementsMap = dataService.mapByDomain(request, propertyKey);
         DomainStats domainStats = new DomainStats();
 
         Integer total = 0;
@@ -587,11 +588,12 @@ public class ClassificationService {
         for (String domain : domainRequirementsMap.keySet()) {
             Integer domainPartialSize = 0;
             for (Requirement r : request.getRequirements()) {
-                if (r.getReqDomains().contains(domain)) {
+                if (r.getReqDomains(propertyKey).contains(domain)) {
                     r.setRequirement_type(domain);
                     ++domainPartialSize;
                 }
-                else if (!r.getRequirement_type().equals("Heading"))
+                else if (r.getRequirement_type()==null ||
+                        (r.getRequirement_type()!=null && !r.getRequirement_type().equals("Heading")))
                     r.setRequirement_type("Prose");
             }
 
