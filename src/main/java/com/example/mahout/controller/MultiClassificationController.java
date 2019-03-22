@@ -22,15 +22,15 @@ public class MultiClassificationController {
 
     @PostMapping("/train")
     @ApiOperation(value = "Create multiple property models",
-            notes = "Given a list of requirements and a company name, a model is created for each property value of the property PROP" +
+            notes = "Given a list of requirements and a company name, a model is created for each property value of the property PROPERTY-KEY" +
                     " present in the requirements list." +
-                    " Each model evaluates if the requirement belongs to the domain or not.")
+                    " Each model evaluates if the requirement belongs to the PROPERTY-KEY value or not.")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "OK", response = String.class)})
-    public void test(@ApiParam(value = "Request with the requirements to train", required = true) @RequestBody RequirementList request,
+    public void test(@ApiParam(value = "Request with the requirements to train", required = true) @RequestBody MultiRequirementList request,
                      @ApiParam(value = "Company to which the model belong", required = true) @RequestParam("company") String enterpriseName,
                      @ApiParam(value = "Property to build the multiclassifier")
                          @RequestParam(value = "property-key", required = false, defaultValue = "reqDomains") String propertyKey) throws Exception {
-        classificationService.trainByDomain(request, enterpriseName, propertyKey);
+        classificationService.trainByDomain(new RequirementList(request, propertyKey), enterpriseName, propertyKey);
     }
 
     @PostMapping("/classify")
@@ -48,16 +48,16 @@ public class MultiClassificationController {
     @RequestMapping(value = "train&test", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Train and test by domain",
             notes = "Returns the result of k cross-validation using the requirements recieved in the request and the model" +
-                    " of the implicit company and domain. Splits the requirements in k groups, trains a classifier for each group with " +
+                    " of the implicit company and PROPERTY-KEY. Splits the requirements in k groups, trains a classifier for each group with " +
                     "all of the requirements recieved except the ones in the group and tests it with the requirements in the group.\n" +
                     "Returns the average of several statistics like the accuracy of the model\n")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "OK", response = DomainStats.class)})
-    public DomainStats trainAndTest(@ApiParam(value = "Request with the requirements to test", required = true) @RequestBody RequirementList request,
+    public DomainStats trainAndTest(@ApiParam(value = "Request with the requirements to test", required = true) @RequestBody MultiRequirementList request,
                                     @ApiParam(value = "Number of tests", required = true) @RequestParam("k") int n,
                                     @ApiParam(value = "Property to build the multiclassifier")
                                         @RequestParam(value = "property-key", required = false, defaultValue = "reqDomains") String propertyKey) throws Exception {
         System.out.println("Starting train and test functionality");
-        DomainStats result = classificationService.trainAndTestByDomain(request, n, propertyKey);
+        DomainStats result = classificationService.trainAndTestByDomain(new RequirementList(request, propertyKey), n, propertyKey);
         return result;
 
     }

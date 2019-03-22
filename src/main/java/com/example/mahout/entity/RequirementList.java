@@ -29,6 +29,17 @@ public class RequirementList implements Serializable {
         }
     }
 
+    public RequirementList(MultiRequirementList request, String property) throws Exception {
+        this.requirements = new ArrayList<>();
+        for (MultiRequirement cr : request.getRequirements()) {
+            Requirement r  = new Requirement();
+            r.setId(cr.getId());
+            r.setText(cr.getText());
+            r.setReqDomains(property, cr.getReqDomains(property));
+            requirements.add(r);
+        }
+    }
+
     public List<Requirement> getRequirements() {
         return requirements;
     }
