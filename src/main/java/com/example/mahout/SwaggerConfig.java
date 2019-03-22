@@ -1,6 +1,6 @@
 package com.example.mahout;
 
-import com.example.mahout.controller.ClassificationController;
+import com.example.mahout.controller.BinaryClassificationController;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.PropertySource;
@@ -14,7 +14,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 
 @PropertySource("classpath:swagger.properties")
-@ComponentScan(basePackageClasses = ClassificationController.class)
+@ComponentScan(basePackageClasses = BinaryClassificationController.class)
 //@Configuration
 @EnableSwagger2
 public class SwaggerConfig {

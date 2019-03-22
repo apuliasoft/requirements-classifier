@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/upc/classifier-component")
 @Api(value = "MahoutAPI", produces = MediaType.APPLICATION_JSON_VALUE)
-public class ClassificationController {
+public class BinaryClassificationController {
 
     @Autowired
     private DataService dataService;
@@ -48,11 +48,11 @@ public class ClassificationController {
             notes = "Given a list of requirements, and using the model stored for the requested company, the requirements are classified " +
             " and a recommended label is returned for each requirement (with a level of confidence)")
     @ApiResponses( value = {@ApiResponse(code = 200, message = "OK", response = RecommendationList.class)})
-    public RecommendationList classify(@ApiParam(value = "Request with the requirements to classify", required = true)@RequestBody RequirementList request,
+    public RecommendationList classify(@ApiParam(value = "Request with the requirements to classify", required = true)@RequestBody ClassifyRequirementList request,
                                               @ApiParam(value = "Property of the classifier", required = true) @RequestParam("property") String property,
                                               @ApiParam(value = "Company to which the model belong", required = true) @RequestParam("company") String enterpriseName) throws Exception {
 
-        return classificationService.classify(request, property, enterpriseName);
+        return classificationService.classify(new RequirementList(request), property, enterpriseName);
 
     }
 

@@ -15,7 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/upc/classifier-component/multiclassifier")
 @Api(value = "Facade", produces = MediaType.APPLICATION_JSON_VALUE)
-public class DomainClassificationController {
+public class MultiClassificationController {
 
     @Autowired
     private ClassificationService classificationService;
@@ -38,11 +38,11 @@ public class DomainClassificationController {
             notes = "Given a list of requirements, a company name and a domain of the company, classifies the list of requirements using" +
                     " the domain model. The result is a list of recommendations based on the classification results.")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "OK", response = RecommendationList.class)})
-    public RecommendationList classify(@ApiParam(value = "Request with the requirements to train", required = true) @RequestBody RequirementList request,
+    public RecommendationList classify(@ApiParam(value = "Request with the requirements to train", required = true) @RequestBody ClassifyRequirementList request,
                                        @ApiParam(value = "Company to which the model belong", required = true) @RequestParam("company") String enterpriseName,
-                                       @ApiParam(value = "Domain to classify requirements by", required = true) @RequestParam("domain") String domain
+                                       @ApiParam(value = "Domain to classify requirements by", required = true) @RequestParam("property-value") String domain
                          ) throws Exception {
-        return classificationService.classifyByDomain(request, enterpriseName, domain);
+        return classificationService.classifyByDomain(new RequirementList(request), enterpriseName, domain);
     }
 
     @RequestMapping(value = "train&test", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
