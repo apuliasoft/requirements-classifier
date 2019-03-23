@@ -39,16 +39,15 @@ public class MultiClassificationController {
                     " the domain model. The result is a list of recommendations based on the classification results.")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "OK", response = RecommendationList.class)})
     public RecommendationList classify(@ApiParam(value = "Request with the requirements to train", required = true) @RequestBody ClassifyRequirementList request,
-                                       @ApiParam(value = "Company to which the model belong", required = true) @RequestParam("company") String enterpriseName,
-                                       @ApiParam(value = "Domain to classify requirements by", required = true) @RequestParam("property-value") String domain
+                                       @ApiParam(value = "Company to which the model belong", required = true) @RequestParam("company") String enterpriseName
                          ) throws Exception {
-        return classificationService.classifyByDomain(new RequirementList(request), enterpriseName, domain);
+        return classificationService.classifyByDomain(new RequirementList(request), enterpriseName);
     }
 
     @RequestMapping(value = "train&test", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Train and test by domain",
             notes = "Returns the result of k cross-validation using the requirements recieved in the request and the model" +
-                    " of the implicit company and PROPERTY-KEY. Splits the requirements in k groups, trains a classifier for each group with " +
+                    " of the implicit company and PROPERTY-KEY+. Splits the requirements in k groups, trains a classifier for each group with " +
                     "all of the requirements recieved except the ones in the group and tests it with the requirements in the group.\n" +
                     "Returns the average of several statistics like the accuracy of the model\n")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "OK", response = DomainStats.class)})

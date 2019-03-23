@@ -1,6 +1,7 @@
 package com.example.mahout.service;
 
 import com.example.mahout.Classifier;
+import com.example.mahout.DAO.CompanyModelDAO;
 import com.example.mahout.DAO.CompanyModelDAOMySQL;
 import com.example.mahout.ReqToTestSet;
 import com.example.mahout.SamplesCreator;
@@ -415,7 +416,7 @@ public class ClassificationService {
             list.add(recomendation);
         }
         for (Requirement r : request.getRequirements()) {
-            if (r.getRequirement_type().equals("Heading")) {
+            if (r.getRequirement_type()!= null && r.getRequirement_type().equals("Heading")) {
                 Recommendation recommendation = new Recommendation();
                 recommendation.setRequirement(r.getId());
                 recommendation.setRequirement_type("Prose");
@@ -565,16 +566,44 @@ public class ClassificationService {
             if (requirementDomainList.getRequirements().contains(requirement)) {
                 requirement.setRequirement_type(domain);
             }
-            else if (requirement.getRequirement_type() == null ||
-                    (requirement.getRequirement_type() != null && requirement.getRequirement_type().equals("Heading"))) requirement.setRequirement_type("Prose");
+            else requirement.setRequirement_type("Prose");
         }
         System.out.println("Creating " + domain + " model...");
         train(request, domain, enterprise);
         System.out.println("Done");
     }
 
-    public RecommendationList classifyByDomain(RequirementList request, String enterpriseName, String property) throws Exception {
-       return classify(request, property, enterpriseName);
+    public RecommendationList classifyByDomain(RequirementList request, String enterpriseName) throws Exception {
+        HashMap<String, Recommendation> totalRecommendationList = new HashMap<>();
+        HashMap<String, Integer> counters = new HashMap<>();
+
+        CompanyModelDAO companyModelDAO = new CompanyModelDAOMySQL();
+        List<CompanyModel> companyModels = companyModelDAO.findByCompany(enterpriseName);
+
+        for (CompanyModel companyModel : companyModels) {
+            RecommendationList recommendationList = classify(request, companyModel.getProperty(), enterpriseName);
+            for (Recommendation r : recommendationList.getRecommendations()) {
+                if (totalRecommendationList.containsKey(r.getRequirement())) {
+                    //TODO if contains
+                    if (!r.getRequirement_type().equals("Prose")) {
+                        Recommendation oldRec = totalRecommendationList.get(r.getRequirement());
+                        counters.put(r.getRequirement(), counters.get(r.getRequirement()) + 1);
+                        oldRec.setConfidence(oldRec.getConfidence() + r.getConfidence());
+                        oldRec.setRequirement_type(oldRec.getRequirement_type() + "\n" + r.getRequirement_type());
+                    }
+                } else {
+                    //TODO if not contains
+                    if (!r.getRequirement_type().equals("Prose")) {
+                        totalRecommendationList.put(r.getRequirement(), r);
+                        counters.put(r.getRequirement(), 1);
+                    }
+                }
+            }
+        }
+        for (String r : totalRecommendationList.keySet()) {
+            totalRecommendationList.get(r).setConfidence(totalRecommendationList.get(r).getConfidence() / counters.get(r));
+        }
+        return new RecommendationList(new ArrayList<>(totalRecommendationList.values()));
     }
 
     public DomainStats trainAndTestByDomain(RequirementList request, int n, String propertyKey) throws Exception {
