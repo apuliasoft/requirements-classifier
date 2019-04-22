@@ -655,6 +655,7 @@ public class ClassificationService {
             RecommendationList recommendationList = classify(request, model, enterpriseName);
             for (Recommendation r : recommendationList.getRecommendations()) {
                 if (!r.getRequirement_type().equals("Prose")) {
+                    r.setRequirement_type(r.getRequirement_type().split("#")[1]);
                     globalList.getRecommendations().add(r);
                 }
             }
