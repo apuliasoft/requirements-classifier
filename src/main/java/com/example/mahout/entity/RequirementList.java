@@ -35,7 +35,9 @@ public class RequirementList implements Serializable {
             Requirement r  = new Requirement();
             r.setId(cr.getId());
             r.setText(cr.getText());
-            r.setReqDomains(property, cr.getReqDomains(property));
+            for (RequirementPart rp : cr.getRequirementParts()) {
+                if (rp.getId().equals(property)) r.setReqDomains(property, rp.getText());
+            }
             requirements.add(r);
         }
     }

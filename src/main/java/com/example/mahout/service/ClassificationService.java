@@ -18,6 +18,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.InputStreamReader;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -374,6 +375,7 @@ public class ClassificationService {
 
             CompanyModel fileModel = new CompanyModel(enterpriseName, property, model, labelindex, dictionary, frequencies);
 
+            if (fileModelSQL == null) fileModelSQL = new CompanyModelDAOMySQL();
             fileModelSQL.save(fileModel);
 
             /*Once we stored the fileModel delete all files */
@@ -427,6 +429,30 @@ public class ClassificationService {
         RecommendationList allRecommendations = new RecommendationList();
         allRecommendations.setRecommendations(list);
         return allRecommendations;
+    }
+
+    public String updateMulti(RequirementList request, String property, String enterpriseName, List<String> modelList) throws Exception {
+        HashMap<String, RequirementList> domainRequirementsMap = dataService.mapByDomain(request, property);
+        for (String domain : domainRequirementsMap.keySet()) {
+            if (!domain.trim().isEmpty()) {
+                if (modelList.isEmpty()) updateDomainModel(request, domainRequirementsMap.get(domain), enterpriseName, property, domain);
+                else if (modelList.contains(domain)) updateDomainModel(request, domainRequirementsMap.get(domain), enterpriseName, property, domain);
+            }
+        }
+        System.out.println("Done");
+        return "Update succsesfull";
+    }
+
+    private void updateDomainModel(RequirementList request, RequirementList requirementList, String enterpriseName, String property, String domain) throws Exception {
+        for (Requirement requirement : request.getRequirements()) {
+            if (requirementList.getRequirements().contains(requirement)) {
+                requirement.setRequirement_type(property + "#" + domain);
+            }
+            else requirement.setRequirement_type("Prose");
+        }
+        System.out.println("Updating " + domain + " model...");
+        update(request, property + "#" + domain, enterpriseName);
+        System.out.println("Done");
     }
 
     public String update(RequirementList request, String property, String enterpriseName) throws Exception {
@@ -546,67 +572,98 @@ public class ClassificationService {
         String property = request.getProperty();
 
         System.out.println("Request parsed, searching for model to delete it.");
-        fileModelSQL.delete(enterpriseName,property);
-        System.out.println("Model deleted");
-        return "Files deleted correctly";
+        if (fileModelSQL == null) fileModelSQL = new CompanyModelDAOMySQL();
+        boolean b;
+        if (request.getCompany().equals("ALL"))
+            b = fileModelSQL.deleteAll();
+        else if (request.getProperty().equals("ALL"))
+            b = fileModelSQL.deleteByCompany(enterpriseName);
+        else
+            b = fileModelSQL.delete(enterpriseName,property);
+
+        if (b) {
+            System.out.println("Model(s) deleted");
+            return "Files deleted correctly";
+        } else {
+            System.out.println("Error");
+            return "Model(s) not found";
+        }
     }
 
-    public void trainByDomain(RequirementList request, String enterprise, String propertyKey) throws Exception {
+    public String deleteMulti(CompanyPropertyKey request, List<String> modelList) throws SQLException {
+        if (fileModelSQL == null) fileModelSQL = new CompanyModelDAOMySQL();
+        boolean b = false;
+        if (modelList == null || modelList.isEmpty()) {
+            b = fileModelSQL.deleteAllMulti(request.getCompany(), request.getProperty());
+        }
+        else {
+            for (String model : modelList) {
+                b = fileModelSQL.delete(request.getCompany(), request.getProperty() + "#" + model);
+                if (!b) break;
+            }
+        }
+        if (b) {
+            System.out.println("Model(s) deleted");
+            return "Files deleted correctly";
+        } else {
+            System.out.println("Error");
+            return "Model(s) not found";
+        }
+    }
+
+    public void trainByDomain(RequirementList request, String enterprise, String propertyKey, List<String> modelList) throws Exception {
         HashMap<String, RequirementList> domainRequirementsMap = dataService.mapByDomain(request, propertyKey);
         for (String domain : domainRequirementsMap.keySet()) {
             if (!domain.trim().isEmpty()) {
-                createDomainModel(request, domainRequirementsMap.get(domain), enterprise, domain);
+                if (modelList == null || modelList.isEmpty()) createDomainModel(request, domainRequirementsMap.get(domain), enterprise, propertyKey, domain);
+                else if (modelList.contains(domain)) createDomainModel(request, domainRequirementsMap.get(domain), enterprise, propertyKey, domain);
             }
         }
         System.out.println("Done");
     }
 
-    private void createDomainModel(RequirementList request, RequirementList requirementDomainList, String enterprise, String domain) throws Exception {
+    private void createDomainModel(RequirementList request, RequirementList requirementDomainList, String enterprise, String propertyKey, String domain) throws Exception {
         for (Requirement requirement : request.getRequirements()) {
             if (requirementDomainList.getRequirements().contains(requirement)) {
-                requirement.setRequirement_type(domain);
+                requirement.setRequirement_type(propertyKey + "#" + domain);
             }
             else requirement.setRequirement_type("Prose");
         }
         System.out.println("Creating " + domain + " model...");
-        train(request, domain, enterprise);
+        train(request, propertyKey + "#" + domain, enterprise);
         System.out.println("Done");
     }
 
-    public RecommendationList classifyByDomain(RequirementList request, String enterpriseName) throws Exception {
-        HashMap<String, Recommendation> totalRecommendationList = new HashMap<>();
-        HashMap<String, Integer> counters = new HashMap<>();
+    public RecommendationList classifyByDomain(RequirementList request, String enterpriseName, String property, List<String> modelList) throws Exception {
+        RecommendationList globalList = new RecommendationList();
 
         CompanyModelDAO companyModelDAO = new CompanyModelDAOMySQL();
-        List<CompanyModel> companyModels = companyModelDAO.findByCompany(enterpriseName);
+        List<String> classifyList = new ArrayList<>();
 
-        for (CompanyModel companyModel : companyModels) {
-            RecommendationList recommendationList = classify(request, companyModel.getProperty(), enterpriseName);
+        if (modelList == null || modelList.isEmpty()) {
+            List<CompanyModel> companyModels = companyModelDAO.findAllMulti(enterpriseName, property);
+            for (CompanyModel cm : companyModels) {
+                classifyList.add(cm.getProperty());
+            }
+        } else {
+            for (String model : modelList) {
+                classifyList.add(property + "#" + model);
+            }
+        }
+
+        for (String model : classifyList) {
+            RecommendationList recommendationList = classify(request, model, enterpriseName);
             for (Recommendation r : recommendationList.getRecommendations()) {
-                if (totalRecommendationList.containsKey(r.getRequirement())) {
-                    //TODO if contains
-                    if (!r.getRequirement_type().equals("Prose")) {
-                        Recommendation oldRec = totalRecommendationList.get(r.getRequirement());
-                        counters.put(r.getRequirement(), counters.get(r.getRequirement()) + 1);
-                        oldRec.setConfidence(oldRec.getConfidence() + r.getConfidence());
-                        oldRec.setRequirement_type(oldRec.getRequirement_type() + "\n" + r.getRequirement_type());
-                    }
-                } else {
-                    //TODO if not contains
-                    if (!r.getRequirement_type().equals("Prose")) {
-                        totalRecommendationList.put(r.getRequirement(), r);
-                        counters.put(r.getRequirement(), 1);
-                    }
+                if (!r.getRequirement_type().equals("Prose")) {
+                    globalList.getRecommendations().add(r);
                 }
             }
         }
-        for (String r : totalRecommendationList.keySet()) {
-            totalRecommendationList.get(r).setConfidence(totalRecommendationList.get(r).getConfidence() / counters.get(r));
-        }
-        return new RecommendationList(new ArrayList<>(totalRecommendationList.values()));
+
+        return globalList;
     }
 
-    public DomainStats trainAndTestByDomain(RequirementList request, int n, String propertyKey) throws Exception {
+    public DomainStats trainAndTestByDomain(RequirementList request, int n, String propertyKey, List<String> modelList) throws Exception {
         HashMap<String, RequirementList> domainRequirementsMap = dataService.mapByDomain(request, propertyKey);
         DomainStats domainStats = new DomainStats();
 
@@ -615,35 +672,15 @@ public class ClassificationService {
         HashMap<String, Stats> statsMap = new HashMap<>();
 
         for (String domain : domainRequirementsMap.keySet()) {
-            Integer domainPartialSize = 0;
-            for (Requirement r : request.getRequirements()) {
-                if (r.getReqDomains(propertyKey).contains(domain)) {
-                    r.setRequirement_type(domain);
-                    ++domainPartialSize;
+            if (!domain.trim().isEmpty()) {
+                if (modelList == null || modelList.isEmpty()) {
+                    total = trainAndTestDomain(request, n, propertyKey, domainStats, total, domainSize, statsMap, domain);
                 }
-                else if (r.getRequirement_type()==null ||
-                        (r.getRequirement_type()!=null && !r.getRequirement_type().equals("Heading")))
-                    r.setRequirement_type("Prose");
+                else if (modelList.contains(domain)) {
+                    total = trainAndTestDomain(request, n, propertyKey, domainStats, total, domainSize, statsMap, domain);
+                }
             }
-
-            Stats s = trainAndTest(request, n);
-
-            ConfusionMatrixStats confusionMatrixStats = new ConfusionMatrixStats();
-            confusionMatrixStats.setTrue_positives(s.getTrue_positives());
-            confusionMatrixStats.setFalse_positives(s.getFalse_positives());
-            confusionMatrixStats.setFalse_negatives(s.getFalse_negatives());
-            confusionMatrixStats.setTrue_negatives(s.getTrue_negatives());
-
-            domainStats.getConfusion_matrix().put(domain, confusionMatrixStats);
-
-            total += domainPartialSize;
-
-            domainSize.put(domain, domainPartialSize);
-            Stats stats = new Stats(s.getKappa(), s.getAccuracy(), s.getReliability(), s.getReliability_std_deviation(),
-                    s.getWeighted_precision(), s.getWeighted_recall(), s.getWeighted_f1_score());
-            statsMap.put(domain, stats);
         }
-
 
         double kappa, accuracy, reliability, reliability_std_deviation, weighted_precision, weighted_recall,
                 weighted_f1_score;
@@ -672,4 +709,37 @@ public class ClassificationService {
 
         return domainStats;
     }
+
+    private Integer trainAndTestDomain(RequirementList request, int n, String propertyKey, DomainStats domainStats, Integer total, HashMap<String, Integer> domainSize, HashMap<String, Stats> statsMap, String domain) throws Exception {
+        Integer domainPartialSize = 0;
+        for (Requirement r : request.getRequirements()) {
+            if (r.getReqDomains(propertyKey).contains(domain)) {
+                r.setRequirement_type(domain);
+                ++domainPartialSize;
+            }
+            else if (r.getRequirement_type()==null ||
+                    (r.getRequirement_type()!=null &&
+                            !r.getRequirement_type().equals("Heading")))
+                r.setRequirement_type("Prose");
+        }
+
+        Stats s = trainAndTest(request, n);
+
+        ConfusionMatrixStats confusionMatrixStats = new ConfusionMatrixStats();
+        confusionMatrixStats.setTrue_positives(s.getTrue_positives());
+        confusionMatrixStats.setFalse_positives(s.getFalse_positives());
+        confusionMatrixStats.setFalse_negatives(s.getFalse_negatives());
+        confusionMatrixStats.setTrue_negatives(s.getTrue_negatives());
+
+        domainStats.getConfusion_matrix().put(domain, confusionMatrixStats);
+
+        total += domainPartialSize;
+
+        domainSize.put(domain, domainPartialSize);
+        Stats stats = new Stats(s.getKappa(), s.getAccuracy(), s.getReliability(), s.getReliability_std_deviation(),
+                s.getWeighted_precision(), s.getWeighted_recall(), s.getWeighted_f1_score());
+        statsMap.put(domain, stats);
+        return total;
+    }
+
 }

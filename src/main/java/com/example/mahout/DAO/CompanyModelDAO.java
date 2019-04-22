@@ -17,6 +17,14 @@ public interface CompanyModelDAO {
 
     boolean delete(String name, String property) throws SQLException;
 
+    boolean deleteByCompany(String name) throws SQLException;
+
+    boolean deleteAll() throws SQLException;
+
+    boolean deleteAllMulti(String company, String property) throws SQLException;
+
+    List<CompanyModel> findAllMulti(String enterpriseName, String property) throws SQLException, IOException;
+
     List<CompanyModel> findAll() throws SQLException, IOException;
 
     boolean exists(String name, String property) throws SQLException;

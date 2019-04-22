@@ -115,10 +115,13 @@ public class Classifier {
         System.out.println("Files deleted correctly\n");
     }
 
-    public  ArrayList<Pair<String, Pair<String, Double>>> classify(String companyName, List<Requirement> requirements, String property) throws IOException, SQLException, JSONException {
+    public  ArrayList<Pair<String, Pair<String, Double>>> classify(String companyName, List<Requirement> requirements, String property) throws Exception {
 
         /* Load the companyModel from the database */
         CompanyModel companyModel = companyModelDAO.findOne(companyName, property);
+
+        if (companyModel == null)
+            throw new Exception("Model not found");
 
         createTmpFiles(companyModel);
 

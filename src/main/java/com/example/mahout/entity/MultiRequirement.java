@@ -7,6 +7,7 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiModel(value = "Multiclassify Requirement", description = "A project requirement")
@@ -14,15 +15,16 @@ public class MultiRequirement implements Serializable {
 
     @ApiModelProperty(value = "ID of the requirement")
     String id;
-    @ApiModelProperty(value = "Property key")
-    String property_key;
     @ApiModelProperty(value = "Text with the requirement information")
     String text;
-
-    HashMap<String, String> properties;
+    @ApiModelProperty(value = "The position of the Requirement as ascending number when Requirements are ordered and order has relevance, such as in a document file.")
+    Integer documentPositionOrder;
+    @ApiModelProperty(value = "The parent Requirement of the current Requirement for hierarchical structure in which the parent and child are tied together and cannot be understood without each other.")
+    String requirementParent;
+    @ApiModelProperty(value = "Aggregation of RequirementParts out of which the requirement consists of. This aggregation provides a mechanism for specifying requirement fragments or additional information for the Requirement.")
+    private List<RequirementPart> requirementParts;
 
     public MultiRequirement() {
-        properties = new HashMap<>();
     }
 
     public String getId() {
@@ -33,14 +35,6 @@ public class MultiRequirement implements Serializable {
         this.id = id;
     }
 
-    public String getProperty_key() {
-        return this.property_key;
-    }
-
-    public void setProperty_key(String property_key) {
-        this.property_key = property_key;
-    }
-
     public String getText() {
         return text;
     }
@@ -49,19 +43,28 @@ public class MultiRequirement implements Serializable {
         this.text = text;
     }
 
-    public String getReqDomains(String key) throws Exception {
-        String s = properties.get(key);
-        if (s == null) throw new Exception("Property not present in JSON object");
-        else return s;
+    public Integer getDocumentPositionOrder() {
+        return documentPositionOrder;
     }
 
-    public void setReqDomains(String key, String reqDomains) {
-        this.properties.put(key, reqDomains);
+    public void setDocumentPositionOrder(Integer documentPositionOrder) {
+        this.documentPositionOrder = documentPositionOrder;
     }
 
-    @JsonAnySetter
-    public void setUnrecognizedFields(String key, Object value) {
-        this.properties.put(key, (String) value);
+    public String getRequirementParent() {
+        return requirementParent;
+    }
+
+    public void setRequirementParent(String requirementParent) {
+        this.requirementParent = requirementParent;
+    }
+
+    public List<RequirementPart> getRequirementParts() {
+        return requirementParts;
+    }
+
+    public void setRequirementParts(List<RequirementPart> requirementParts) {
+        this.requirementParts = requirementParts;
     }
 
 }

@@ -7,16 +7,21 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.List;
 
 @ApiModel(value = "Requirement", description = "A project requirement")
 public class Requirement implements Serializable {
 
     @ApiModelProperty(value = "ID of the requirement")
-    String id;
+    private String id;
     @ApiModelProperty(value = "Requirement type")
-    String requirement_type;
+    private String requirement_type;
     @ApiModelProperty(value = "Text with the requirement information")
-    String text;
+    private String text;
+    @ApiModelProperty(value = "The position of the Requirement as ascending number when Requirements are ordered and order has relevance, such as in a document file.")
+    private Integer documentPositionOrder;
+    @ApiModelProperty(value = "The parent Requirement of the current Requirement for hierarchical structure in which the parent and child are tied together and cannot be understood without each other.")
+    private String requirementParent;
 
     HashMap<String, String> properties;
 
@@ -56,6 +61,22 @@ public class Requirement implements Serializable {
 
     public void setReqDomains(String key, String reqDomains) {
         this.properties.put(key, reqDomains);
+    }
+
+    public Integer getDocumentPositionOrder() {
+        return documentPositionOrder;
+    }
+
+    public void setDocumentPositionOrder(Integer documentPositionOrder) {
+        this.documentPositionOrder = documentPositionOrder;
+    }
+
+    public String getRequirementParent() {
+        return requirementParent;
+    }
+
+    public void setRequirementParent(String requirementParent) {
+        this.requirementParent = requirementParent;
     }
 
     @JsonAnySetter
