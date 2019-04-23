@@ -11,6 +11,8 @@ public interface CompanyModelDAO {
 
     CompanyModel findOne(String name, String property) throws SQLException, IOException;
 
+    List<CompanyModel> findByCompany(String company) throws SQLException, IOException;
+
     boolean save(CompanyModel fileModel) throws SQLException;
 
     boolean delete(String name, String property) throws SQLException;

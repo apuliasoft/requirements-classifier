@@ -1,6 +1,6 @@
 package com.example.mahout;
 
-import com.example.mahout.controller.ClassificationController;
+import com.example.mahout.controller.BinaryClassificationController;
 import com.example.mahout.storage.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -27,7 +27,7 @@ public class ViewController {
     public String listUploadedFiles(Model model) throws IOException {
         
         model.addAttribute("files", storageService.loadAll().map(
-                path -> MvcUriComponentsBuilder.fromMethodName(ClassificationController.class,
+                path -> MvcUriComponentsBuilder.fromMethodName(BinaryClassificationController.class,
                         "serveFile", path.getFileName().toString()).build().toString())
                 .collect(Collectors.toList()));
 

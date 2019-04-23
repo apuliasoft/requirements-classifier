@@ -52,6 +52,31 @@ public class CompanyModelDAOMySQL implements CompanyModelDAO {
     }
 
     @Override
+    public List<CompanyModel> findByCompany(String company) throws SQLException, IOException {
+
+        PreparedStatement ps;
+        ps = c.prepareStatement("SELECT * FROM file_model_documents WHERE COMPANY_NAME = ?");
+        ps.setString(1, company);
+        ps.execute();
+        ResultSet rs = ps.getResultSet();
+
+        List<CompanyModel> fileModels = new ArrayList<>();
+        while (rs.next()) {
+            fileModels.add(new CompanyModel(
+                    rs.getString("COMPANY_NAME"),
+                    rs.getString("PROPERTY"),
+                    rs.getBytes("MODEL"),
+                    rs.getBytes("LABELINDEX"),
+                    rs.getBytes("DICTIONARY"),
+                    rs.getBytes("FREQUENCIES")));
+        }
+        ps.close();
+        rs.close();
+
+        return fileModels;
+    }
+
+    @Override
     public boolean save(CompanyModel fileModel) throws SQLException {
 
         PreparedStatement ps;

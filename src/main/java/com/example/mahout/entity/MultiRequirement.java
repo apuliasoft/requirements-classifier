@@ -8,19 +8,20 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import java.io.Serializable;
 import java.util.HashMap;
 
-@ApiModel(value = "Requirement", description = "A project requirement")
-public class Requirement implements Serializable {
+@JsonIgnoreProperties(ignoreUnknown = true)
+@ApiModel(value = "Multiclassify Requirement", description = "A project requirement")
+public class MultiRequirement implements Serializable {
 
     @ApiModelProperty(value = "ID of the requirement")
     String id;
-    @ApiModelProperty(value = "Requirement type")
-    String requirement_type;
+    @ApiModelProperty(value = "Property key")
+    String property_key;
     @ApiModelProperty(value = "Text with the requirement information")
     String text;
 
     HashMap<String, String> properties;
 
-    public Requirement() {
+    public MultiRequirement() {
         properties = new HashMap<>();
     }
 
@@ -32,12 +33,12 @@ public class Requirement implements Serializable {
         this.id = id;
     }
 
-    public String getRequirement_type() {
-        return requirement_type;
+    public String getProperty_key() {
+        return this.property_key;
     }
 
-    public void setRequirement_type(String requirement_type) {
-        this.requirement_type = requirement_type;
+    public void setProperty_key(String property_key) {
+        this.property_key = property_key;
     }
 
     public String getText() {
@@ -62,4 +63,5 @@ public class Requirement implements Serializable {
     public void setUnrecognizedFields(String key, Object value) {
         this.properties.put(key, (String) value);
     }
+
 }

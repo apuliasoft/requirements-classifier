@@ -40,7 +40,7 @@ public class CompanyModel implements Serializable {
         return file;
     }
 
-    public CompanyModel(String companyName, String name, byte[] model, byte[] labelindex, byte[] dictionary, byte[] frequency) throws IOException {
+    public CompanyModel(String companyName, String property, byte[] model, byte[] labelindex, byte[] dictionary, byte[] frequency) throws IOException {
         this.companyName = companyName;
         this.property = property;
         this.model = model;
