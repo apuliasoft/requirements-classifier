@@ -10,6 +10,7 @@ RUN apt-get install -y maven
 COPY . /tmp/classifier/
 
 WORKDIR /tmp/classifier/
+RUN mkdir tmpFiles
 
 RUN ssh-keygen -A
 
