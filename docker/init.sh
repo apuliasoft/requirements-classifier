@@ -1,10 +1,11 @@
 #!/bin/bash
+source ~/.bashrc
 
-/usr/sbin/sshd
+service ssh start
 
-/tmp/classifier/hadoop/sbin/start-all.sh
-/tmp/classifier/hadoop/bin/hdfs dfsadmin -safemode leave
-/tmp/classifier/hadoop/sbin/start-dfs.sh
-/tmp/classifier/hadoop/bin/hdfs dfsadmin -safemode leave
+cd /tmp/classifier
 
-java -jar /tmp/classifier/target/mahout-0.0.1-SNAPSHOT.jar
+start-all.sh
+hdfs dfsadmin -safemode leave
+
+java -jar target/mahout-0.0.1-SNAPSHOT.jar

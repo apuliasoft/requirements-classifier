@@ -1,4 +1,4 @@
-JAVA_HOME,/opt/ibm/java/jre
+JAVA_HOME,/usr/lib/jvm/java-8-openjdk-amd64
 HADOOP_HOME,/tmp/classifier/hadoop
 HADOOP_MAPRED_HOME,/tmp/classifier/hadoop
 HADOOP_COMMON_HOME,/tmp/classifier/hadoop

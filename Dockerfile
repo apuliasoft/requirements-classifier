@@ -1,7 +1,11 @@
-FROM maven:3.6.0-ibmjava-8-alpine
+FROM ubuntu:16.04
 
-RUN apk update
-RUN apk add --no-cache openssh
+SHELL ["/bin/bash", "-c"]
+
+RUN apt-get update -y
+RUN apt-get install -y openssh-server
+RUN apt-get install -y openjdk-8-jdk
+RUN apt-get install -y maven
 
 COPY . /tmp/classifier/
 
@@ -18,7 +22,7 @@ RUN echo -e "root\nroot" | passwd
 
 RUN cp ./docker/environment.txt ./config/environment.txt
 RUN cp ./docker/.bashrc ~/.bashrc
-RUN source ~/.bashrc
+# RUN source ~/.bashrc - non serve perchè ogni comando fa shell a se stante
 RUN cp ./docker/hadoop-env.sh ./hadoop/etc/hadoop/hadoop-env.sh
 RUN cp ./docker/hdfs-site.xml ./hadoop/etc/hadoop/hdfs-site.xml
 RUN cp ./docker/core-site.xml ./hadoop/etc/hadoop/core-site.xml
@@ -33,4 +37,3 @@ RUN wget http://central.maven.org/maven2/org/apache/mahout/mahout-examples/0.12.
 RUN mvn clean install package -DskipTests=true
 
 CMD ["./init.sh"]
-
