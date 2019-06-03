@@ -38,10 +38,13 @@ public class DataService {
         List<Requirement> filteredRequirements = new ArrayList<>();
         for (int i = 0; i < requirements.size(); ++i) {
             Requirement requirement = requirements.get(i);
-            if (requirement.getRequirement_type() != null &&
+            /*if (requirement.getRequirement_type() != null &&
                     !requirement.getRequirement_type().equals("Heading"))
                 filteredRequirements.add(requirement);
             else if (requirement.getRequirement_type() == null)
+                filteredRequirements.add(requirement);*/
+            //FIXME headers parsing: now only if text is not null
+            if (requirement.getText() != null && !requirement.getText().isEmpty())
                 filteredRequirements.add(requirement);
         }
         System.out.println("Input: " + requirements.size() + " requirements, " + filteredRequirements.size() + " after filtering (header sections)");

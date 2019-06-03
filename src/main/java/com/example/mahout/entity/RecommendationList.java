@@ -3,6 +3,7 @@ package com.example.mahout.entity;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -12,7 +13,7 @@ public class RecommendationList implements Serializable {
     private List<Recommendation> recommendations;
 
     public RecommendationList() {
-
+        recommendations = new ArrayList<>();
     }
 
     public RecommendationList(List<Recommendation> values) {

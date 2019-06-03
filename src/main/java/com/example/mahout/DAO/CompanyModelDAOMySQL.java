@@ -104,6 +104,60 @@ public class CompanyModelDAOMySQL implements CompanyModelDAO {
     }
 
     @Override
+    public boolean deleteByCompany(String companyName) throws SQLException {
+        PreparedStatement ps;
+        ps = c.prepareStatement("DELETE FROM file_model_documents WHERE COMPANY_NAME = ?");
+        ps.setString(1, companyName);
+        int result = ps.executeUpdate();
+        ps.close();
+        return result != 0;
+    }
+
+    @Override
+    public boolean deleteAll() throws SQLException {
+        PreparedStatement ps;
+        ps = c.prepareStatement("DELETE FROM file_model_documents");
+        int result = ps.executeUpdate();
+        ps.close();
+        return result != 0;
+    }
+
+    @Override
+    public boolean deleteAllMulti(String companyName, String property) throws SQLException {
+        PreparedStatement ps;
+        ps = c.prepareStatement("DELETE FROM file_model_documents WHERE COMPANY_NAME = ? AND PROPERTY LIKE ? || '%'");
+        ps.setString(1, companyName);
+        ps.setString(2, property);
+        int result = ps.executeUpdate();
+        ps.close();
+        return result != 0;
+    }
+
+    @Override
+    public List<CompanyModel> findAllMulti(String enterpriseName, String property) throws SQLException, IOException {
+        PreparedStatement ps;
+        ps = c.prepareStatement("SELECT * FROM file_model_documents WHERE COMPANY_NAME = ? AND PROPERTY LIKE ? || '%'");
+        ps.setString(1, enterpriseName);
+        ps.setString(2, property);
+        ps.execute();
+        ResultSet rs = ps.getResultSet();
+
+        List<CompanyModel> fileModels = new ArrayList<>();
+        while (rs.next()) {
+            fileModels.add(new CompanyModel(
+                    rs.getString("COMPANY_NAME"),
+                    rs.getString("PROPERTY"),
+                    rs.getBytes("MODEL"),
+                    rs.getBytes("LABELINDEX"),
+                    rs.getBytes("DICTIONARY"),
+                    rs.getBytes("FREQUENCIES")));
+        }
+        ps.close();
+        rs.close();
+
+        return fileModels;    }
+
+    @Override
     public List<CompanyModel> findAll() throws SQLException, IOException {
 
         PreparedStatement ps;
