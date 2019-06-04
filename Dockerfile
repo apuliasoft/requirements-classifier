@@ -26,7 +26,7 @@ RUN cp ./docker/.bashrc ~/.bashrc
 # RUN source ~/.bashrc - non serve perchè ogni comando fa shell a se stante
 RUN cp ./docker/hadoop-env.sh ./hadoop/etc/hadoop/hadoop-env.sh
 RUN cp ./docker/hdfs-site.xml ./hadoop/etc/hadoop/hdfs-site.xml
-RUN cp ./docker/core-site.xml ./hadoop/etc/hadoop/core-site.xml
+# RUN cp ./docker/core-site.xml ./hadoop/etc/hadoop/core-site.xml
 RUN cp ./docker/init.sh ./init.sh && chmod +x init.sh
 RUN cp ./docker/ssh_config /etc/ssh/ssh_config
 RUN mkdir -p /tmp/classifier/hadoop/hadoop_store/hdfs/datanode
